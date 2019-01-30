@@ -7,20 +7,23 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import com.myAPI.APIproject.db.TaskDao;
+import com.myAPI.APIproject.db.UserDao;
+
 
 @Component
 public class SecurityService implements UserDetailsService {
-	private TaskDao taskDao;
+	private UserDao userDao;
 
 	@Autowired
-	public SecurityService(TaskDao taskDaoIn) {
+	public SecurityService(UserDao userDaoIn) {
 		super();
-		this.taskDao = taskDaoIn;
+		this.userDao = userDaoIn;
 	}
-/**method used to authorize user*/
+
+	/** method used to authorize user */
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		// TODO Auto-generated method stub
-		return taskDao.getUserByName(username);
+		return userDao.getUserByName(username);
 	}
 }

@@ -18,17 +18,15 @@ import com.myAPI.APIproject.task.Task;
 @RestController
 public class ToDoController {
 	private TaskDao taskDao;
-
 	@Autowired
 	public ToDoController(TaskDao taskDao) {
 		super();
 		this.taskDao = taskDao;
 	}
-
 	/** Supervisor can assign a task to an employee */
 	@RequestMapping(value = "/supervisor/assignTask", method = RequestMethod.POST)
 	public void supervisorAssignTask(@RequestBody AddTaskRequest taskIn) {
-		taskDao.assignTask(taskIn.getTitle(), taskIn.getDescription(), taskIn.getPriority(), taskIn.getDate(),
+	taskDao.assignTask(taskIn.getTitle(), taskIn.getDescription(), taskIn.getPriority(), taskIn.getDate(),
 				taskIn.getUserId());
 	}
 
@@ -44,22 +42,10 @@ public class ToDoController {
 		taskDao.supervisorDeleteTask(taskIn.getTaskId());
 	}
 
-	/** Employee can view his list of tasks */
-	@RequestMapping(value = "/employee/TasksForEmployee", method = RequestMethod.GET)
-	public List<Task> employeeGetTasks() {
-		return taskDao.getEmployeeTasks();
-	}
-
-	/** Employee can view his list of tasks by task priority */
-	@RequestMapping(value = "/employee/TasksForEmployeeByPriority", method = RequestMethod.GET)
-	public List<Task> employeeGetTasksByPriority() {
-		return taskDao.getEmployeeTasksByPriority();
-	}
-
-	/** Employee can view his list of tasks by task priority */
-	@RequestMapping(value = "/employee/TasksForEmployeeByDate", method = RequestMethod.GET)
-	public List<Task> employeeGetTasksByDate() {
-		return taskDao.getEmployeeTasksByDate();
+	/** Employee can view his list of all tasks, employee can also filter by task priority or date - requires priority/taskDate param */
+	@RequestMapping(value = "/employee/TasksForEmployeeByFilter", method = RequestMethod.GET)
+	public List<Task> employeeGetTasksByPriority(@RequestParam(value = "filterOption") String filterIn) {
+		return taskDao.getEmployeeTasksByFilter(filterIn);
 	}
 
 	/** Employee can confirm task completion */

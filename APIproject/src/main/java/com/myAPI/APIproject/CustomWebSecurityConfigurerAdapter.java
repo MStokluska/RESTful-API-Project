@@ -14,22 +14,20 @@ import com.myAPI.APIproject.service.SecurityService;
 public class CustomWebSecurityConfigurerAdapter extends WebSecurityConfigurerAdapter {
 	final private SecurityService secServiceIn;
 	final private PasswordEncoder encoderIn;
-
 	@Autowired
 	public CustomWebSecurityConfigurerAdapter(SecurityService secServiceIn, PasswordEncoder encoderIn) {
 		super();
 		this.secServiceIn = secServiceIn;
 		this.encoderIn = encoderIn;
 	}
-
 	@Autowired
 	public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
 		auth.userDetailsService(secServiceIn).passwordEncoder(encoderIn);
 	}
-
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests()
+		http	.csrf().disable()
+				.authorizeRequests()
 				.regexMatchers("/admin/.*").hasAnyAuthority("admin")
 				.regexMatchers("/supervisor/.*").hasAuthority("supervisor")
 				.regexMatchers("/employee/.*").hasAuthority("employee")

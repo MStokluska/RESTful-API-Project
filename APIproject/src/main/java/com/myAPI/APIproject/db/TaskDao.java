@@ -27,31 +27,13 @@ import com.myAPI.APIproject.user.ToDoAppUser;
 @Component
 public class TaskDao {
 	private Connection conn;
-	@Value("${host}")
-	private String host;
-	@Value("${db}")
-	private String db;
-	@Value("${user}")
-	private String user;
-	@Value("${password}")
-	private String password;
-	final private PasswordEncoder passwordEncoder;
-
+	
 	@Autowired
-	public TaskDao(PasswordEncoder passwordEncoder) {
+	public TaskDao(Connections connection) {
 		super();
-		this.passwordEncoder = passwordEncoder;
+		this.conn = connection.init();
 	}
 
-	@PostConstruct
-	public void init() {
-		try {
-			conn = DriverManager
-					.getConnection("jdbc:mysql://" + host + "/" + db + "?" + "user=" + user + "&password=" + password);
-		} catch (SQLException ex) {
-			throw new IllegalStateException(ex);
-		}
-	}
 
 	/** method for supervisor to add task to an employee */
 	public void assignTask(String taskTitleIn, String taskDescriptionIn, int taskPriorityIn, LocalDate dateIn,
@@ -164,112 +146,21 @@ public class TaskDao {
 		}
 	}
 
-	/**
-	 * method for employee to view his tasks by entering employee name and password
-	 */
-	public List<Task> getEmployeeTasks() {
+	/** method for employee to view all tasks or filter them by priority or date */
+	public List<Task> getEmployeeTasksByFilter(String filterIn) {
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		ToDoAppUser user = (ToDoAppUser) authentication.getPrincipal();
 		Statement stmt = null;
 		ResultSet rs = null;
 		try {
 			stmt = conn.createStatement();
+			if(filterIn.isEmpty()) {
+				rs = stmt.executeQuery("select id, title, description, priority, taskDate, status from task where userid=\""
+						+ user.getUserId() + "\";");
+			}else {
 			rs = stmt.executeQuery("select id, title, description, priority, taskDate, status from task where userid=\""
-					+ user.getUserId() + "\";");
-			List<Task> newList = new ArrayList<>();
-			while (rs.next()) {
-				int id = rs.getInt("id");
-				String title = rs.getString("Title");
-				String description = rs.getString("Description");
-				int priority = rs.getInt("Priority");
-				Date date = rs.getDate("TaskDate");
-				LocalDate localDate = date == null ? null : date.toLocalDate();
-				String status = rs.getString("Status");
-				Task newTask = Task.builder().id(id).title(title).description(description).priority(priority)
-						.date(localDate).status(status).build();
-				newList.add(newTask);
+					+ user.getUserId() + "\" order by " + filterIn + ";");
 			}
-			return newList;
-		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) {
-				}
-				rs = null;
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) {
-				}
-				stmt = null;
-			}
-		}
-		return null;
-	}
-
-	/** method for employee to view tasks by priority */
-	public List<Task> getEmployeeTasksByPriority() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		ToDoAppUser user = (ToDoAppUser) authentication.getPrincipal();
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select id, title, description, priority, taskDate, status from task where userid=\""
-					+ user.getUserId() + "\" order by priority;");
-			List<Task> newList = new ArrayList<>();
-			while (rs.next()) {
-				int id = rs.getInt("id");
-				String title = rs.getString("Title");
-				String description = rs.getString("Description");
-				int priority = rs.getInt("Priority");
-				Date date = rs.getDate("TaskDate");
-				LocalDate localDate = date == null ? null : date.toLocalDate();
-				String status = rs.getString("Status");
-				Task newTask = Task.builder().id(id).title(title).description(description).priority(priority)
-						.date(localDate).status(status).build();
-				newList.add(newTask);
-			}
-			return newList;
-		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) {
-				}
-				rs = null;
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) {
-				}
-				stmt = null;
-			}
-		}
-		return null;
-	}
-
-	/** method for employee to view tasks by date */
-	public List<Task> getEmployeeTasksByDate() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		ToDoAppUser user = (ToDoAppUser) authentication.getPrincipal();
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("select id, title, description, priority, taskDate, status from task where userid=\""
-					+ user.getUserId() + "\" order by taskDate;");
 			List<Task> newList = new ArrayList<>();
 			while (rs.next()) {
 				int id = rs.getInt("id");
@@ -334,45 +225,5 @@ public class TaskDao {
 				stmt = null;
 			}
 		}
-	}
-
-	/** method used to authorize users */
-	public ToDoAppUser getUserByName(String nameIn) {
-		Statement stmt = null;
-		ResultSet rs = null;
-		try {
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery("SELECT * from users where name=\"" + nameIn + "\"");
-
-			if (rs.next()) {
-				String userId = rs.getString("userId");
-				String name = rs.getString("Name");
-				String password = rs.getString("password");
-				String position = rs.getString("Position");
-				ToDoAppUser newUser = new ToDoAppUser(userId, name, password, Collections.singletonList(position));
-				return newUser;
-			}
-			return null;
-		} catch (SQLException ex) {
-			System.out.println("SQLException: " + ex.getMessage());
-			System.out.println("SQLState: " + ex.getSQLState());
-			System.out.println("VendorError: " + ex.getErrorCode());
-		} finally {
-			if (rs != null) {
-				try {
-					rs.close();
-				} catch (SQLException sqlEx) {
-				}
-				rs = null;
-			}
-			if (stmt != null) {
-				try {
-					stmt.close();
-				} catch (SQLException sqlEx) {
-				}
-				stmt = null;
-			}
-		}
-		return null;
 	}
 }

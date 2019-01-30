@@ -18,7 +18,7 @@ public class ToDoAppUser extends User {
 	private String userId;
 	private static final long serialVersionUID = 1L;
 
-	public ToDoAppUser(String userId, String username, String password, Collection<String> authorities) {
+	public ToDoAppUser(String userId, String username, String password, Collection<String> authorities) { 
 		super(username, password, mapAuthorities(authorities));
 		this.userId = userId;
 	}

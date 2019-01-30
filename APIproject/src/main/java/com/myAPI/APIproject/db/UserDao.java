@@ -20,30 +20,14 @@ import com.myAPI.APIproject.user.ToDoAppUser;
 @Component
 public class UserDao {
 	private Connection conn;
-	@Value("${host}")
-	private String host;
-	@Value("${db}")
-	private String db;
-	@Value("${user}")
-	private String user;
-	@Value("${password}")
 	private String password;
 	final private PasswordEncoder passwordEncoder;
 
 	@Autowired
-	public UserDao(PasswordEncoder passwordEncoder) {
+	public UserDao(PasswordEncoder passwordEncoder, Connections connection) {
 		super();
 		this.passwordEncoder = passwordEncoder;
-	}
-
-	@PostConstruct
-	public void init() {
-		try {
-			conn = DriverManager
-					.getConnection("jdbc:mysql://" + host + "/" + db + "?" + "user=" + user + "&password=" + password);
-		} catch (SQLException ex) {
-			throw new IllegalStateException(ex);
-		}
+		this.conn = connection.init();
 	}
 
 	/** method for admin to add a supervisor */
@@ -243,4 +227,45 @@ public class UserDao {
 			}
 		}
 	}
+
+	/** method used to authorize users */
+	public ToDoAppUser getUserByName(String nameIn) {
+		Statement stmt = null;
+		ResultSet rs = null;
+		try {
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery("SELECT * from users where name=\"" + nameIn + "\"");
+
+			if (rs.next()) {
+				String userId = rs.getString("userId");
+				String name = rs.getString("Name");
+				String password = rs.getString("password");
+				String position = rs.getString("Position");
+				ToDoAppUser newUser = new ToDoAppUser(userId, name, password, Collections.singletonList(position));
+				return newUser;
+			}
+			return null;
+		} catch (SQLException ex) {
+			System.out.println("SQLException: " + ex.getMessage());
+			System.out.println("SQLState: " + ex.getSQLState());
+			System.out.println("VendorError: " + ex.getErrorCode());
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException sqlEx) {
+				}
+				rs = null;
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException sqlEx) {
+				}
+				stmt = null;
+			}
+		}
+		return null;
+	}
+
 }
