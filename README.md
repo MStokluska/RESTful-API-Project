@@ -345,32 +345,6 @@ ResponseBody:
 
 
 
-Name: Employee - View All Tasks By Date
-
-Function:
-Employee is authorized to view all assigned tasks to him/her and filter by Date
-Method: GET
-URL: {host}:{port}/employee/tasksForEmployeeByDate
-Authorization: Basic Authorization 
-Content Type: application/json
-RequestParam: Empty
-ResponseBody: 
-{
-“id”: “{autoincrementing task id number}”,
-“title”: “{title of task}”,
-“description”: “{description of task}”,
-“priority”: “{output filtered by priority number}”,
-“date”: “{target date}”,
-“status”: “{“To Be Completed” until marked down as “Completed” by an employee}”,
-“userId”: “null”
-}
-
-
-
-
-
-
-
 
 
 
