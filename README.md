@@ -1,6 +1,10 @@
 # RESTful-API-Project
 
-This is my first RESTful API Project
+Project idea:
+This is my first RESTful API Project, purpose of this project is to allow admin to create supervisors, supervisors then can create employees and later, assign tasks to existing employees. Employees then can view tasks assigned and mark them as completed.
+Admin can also delete supervisors, supervisors can delete employees or tasks.
+
+Project architecture:
 I have used Maven to build my RESTful API. API is build using Spring Framework. 
 My controllers are GET, POST and DELETE for Users and Tasks, writing the controllers and methods for them was great exercise but only 
 after completing few of them I have found out that GET is the only request that can contain PARAMS so I have to re-do it all, 
@@ -335,8 +339,6 @@ ResponseBody:
 
 
 
-Thank you,
-Michael Stokluska
 
 
 
@@ -392,3 +394,6 @@ Example:
 “taskId”: 2
 }
 
+
+Thank you,
+Michael Stokluska
